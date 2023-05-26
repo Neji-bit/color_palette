@@ -119,18 +119,25 @@ class Gradation extends React.Component {
     this.state = {id: "gradation", color: "#ffffff"}
     _react[this.state.id] = this
   }
-  static clicked = (e) => {
+  static pickColor = (e) => {
+    let cell = Util.getElement(e.nativeEvent.pageX, e.nativeEvent.pageY)
+    if(!cell || !cell.classList.contains("cell--gradation")) return
     if(isNaN(_currentPickedColor) || _currentPickedColor == null) return
+    if(e.buttons == 0) return
     let currentPickedColor = _pickedColors[_currentPickedColor]
-    let actualColor = e.currentTarget.style.background
+    let actualColor = cell.style.background
     let array = actualColor.replace(/[^0-9,]/g, "").split(",").map((n) => {return parseInt(n)})
-    let saturation = e.currentTarget.dataset.saturation
-    let brightness = e.currentTarget.dataset.brightness
+    let saturation = cell.dataset.saturation
+    let brightness = cell.dataset.brightness
     currentPickedColor.actualColor = Color.rgbToCode(array)
     currentPickedColor.saturation = saturation
     currentPickedColor.brightness = brightness
     _react.picked_colors.forceUpdate()
   }
+  static mouseDown = (e) => { this.pickColor(e) }
+  static mouseMove = (e) => { this.pickColor(e) }
+  static touchStart = (e) => { this.pickColor(e) }
+  static touchMove = (e) => { this.pickColor(e) }
   render() {
     let grid = [];
     "0123456789abcdef".split("").forEach((n, i) => {
@@ -139,8 +146,8 @@ class Gradation extends React.Component {
         let actualColor = Color.mix(baseColor, this.state.color, (1.0 * j/ 15))
         grid.push((
           <div key={`${i}_${j}`}
+            className={"cell--gradation"}
             style={{background: actualColor}}
-            onClick={Gradation.clicked}
             data-saturation={i}
             data-brightness={j}
           />
@@ -148,10 +155,22 @@ class Gradation extends React.Component {
       })
     })
     return (
-      <div id={this.state.id}>
+      <div id={this.state.id}
+        onMouseDown={Gradation.mouseDown}
+        onMouseMove={Gradation.mouseMove}
+        onTouchStart={Gradation.touchStart}
+        onTouchMove={Gradation.touchMove}
+      >
         {grid}
       </div>
     )
+  }
+}
+
+class Util {
+  static getElement = (x, y) => {
+    if(!(x && y)) return null
+    return document.elementFromPoint(x, y)
   }
 }
 
@@ -161,25 +180,21 @@ class PickedColors extends React.Component {
     this.state = {id: "picked_colors"}
     _react[this.state.id] = this
   }
-  static getElement = (x, y) => {
-    if(!(x && y)) return null
-    return document.elementFromPoint(x, y)
-  }
   static clicked = (e) => {
-    let cell = this.getElement(e.clientX, e.clientY)
+    let cell = Util.getElement(e.clientX, e.clientY)
     if(!cell) return
     let color = _pickedColors[cell.dataset.pickednum]?.baseColor
     if(color) _react.gradation.setState({color: color})
     _currentPickedColor = cell.dataset.pickednum
   }
   static mouseDown = (e) => {
-    let cell = this.getElement(e.nativeEvent.pageX, e.nativeEvent.pageY)
+    let cell = Util.getElement(e.nativeEvent.pageX, e.nativeEvent.pageY)
     if(!cell) return
     _mouseDownedPickedCellNum = cell.dataset.pickednum
     _mouseUpedPickedCellNum = null
   }
   static mouseUp = (e) => {
-    let cell = this.getElement(e.nativeEvent.pageX, e.nativeEvent.pageY)
+    let cell = Util.getElement(e.nativeEvent.pageX, e.nativeEvent.pageY)
     if(!cell || !cell.classList.contains("cell--picked")) return
     let pickednum = cell.dataset.pickednum
     if(_mouseDownedPickedCellNum != pickednum) {
