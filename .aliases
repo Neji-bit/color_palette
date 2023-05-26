@@ -1,6 +1,6 @@
 # Docker経由でのRails開発のためのalias
-export _DOCKER_IMAGE="rr_base_rails"
-export _DOCKER_CONTAINER="rr_base_rails"
+export _DOCKER_IMAGE="color_palette_rails"
+export _DOCKER_CONTAINER="color_palette_rails"
 export _RAILS_DIR="/rails_app"
 
 alias _d="docker"
@@ -24,7 +24,7 @@ alias _logs="docker logs \${_DOCKER_CONTAINER}"
 # コンテナ操作用_作業
 alias _bash="docker exec -it -w \${_RAILS_DIR} \${_DOCKER_CONTAINER} bash"
 alias __bash="docker run --rm -it -v \$(pwd)/share:/share -v \$(pwd)/rails_app:/rails_app \${_DOCKER_IMAGE} bash"
-alias _pg_bash="docker exec -it rr_base_postgres bash"
+alias _pg_bash="docker exec -it color_palette_postgres bash"
 
 # rails操作用
 alias _rails_up="docker exec \${_DOCKER_CONTAINER} /share/bin/rails_up.sh"
@@ -34,7 +34,7 @@ alias _ps="docker exec -it -w \${_RAILS_DIR} \${_DOCKER_CONTAINER} bash -c 'ps -
 # サイトが立ち上がったかを確認する。
 function _ping() {
   while ; do
-    curl -m 3 localhost:3000/rr_base > /dev/null 2>&1
+    curl -m 3 localhost:3000/app > /dev/null 2>&1
     if [ $? -eq 0 ]; then
       echo "Success!"
       break

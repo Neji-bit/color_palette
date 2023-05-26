@@ -15,15 +15,15 @@ default: &default
 
 development:
   <<: *default
-  database: rr_base_development
+  database: color_palette_development
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
 # Do not set this db to the same as development or production.
 test:
   <<: *default
-  database: rr_base_test
+  database: color_palette_test
 
 production:
   <<: *default
-  database: rr_base_production
+  database: color_palette_production

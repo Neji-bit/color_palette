@@ -3,7 +3,7 @@ version: '3'
 services:
   db:
     image: postgres
-    container_name: rr_base_postgres
+    container_name: color_palette_postgres
     ports:
       - 5432:5432
     volumes:
@@ -14,7 +14,7 @@ services:
       - POSTGRES_USER=postgres
   rails:
     build: .
-    container_name: rr_base_rails
+    container_name: color_palette_rails
     command: bash -c "/share/bin/rails_setup.sh && /share/bin/rails_up.sh"
     volumes:
       - ./share:/share
