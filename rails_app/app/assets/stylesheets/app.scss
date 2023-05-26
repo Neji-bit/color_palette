@@ -1,5 +1,94 @@
 //Sassy
 
+//  アプリ全体の共通設定。
+* {
+  //  ディスプレイの横幅最大値。
+  --width: 100vw;
+  @media screen and (min-width: 414px) {
+    --width: 414px;
+  }
+  --height: 100vh;
+
+  font-family: system-ui;
+  user-select: none;
+  box-sizing: border-box;
+  -webkit-tap-highlight-color:rgba(0,0,0,0);
+}
+//  変数の定義
+* {
+  --color--backboard--bg: silver;
+  --border--great: 10px;
+  --color--backboard--border: black;
+}
+body {
+  * {
+    display: grid;
+  //  TODO  開発用。赤枠を表示。
+    border: 0.5px solid red;
+  }
+
+  //  基本、すべてグリッドで管理する。
+  display: grid;
+  background: darkgray;
+  margin: 0px;
+  justify-content: center;
+  overflow: scroll;
+}
+
+
+// PC画面用。画面左右を隠す板。
+_cover {
+  position: absolute;
+  --cover-width: calc((100vw - var(--width)) / 2);
+  width: var(--cover-width);
+  height: 100vh;
+  background: darkgray;
+  z-index: 10;
+  @media not screen and (min-width: 414px) {
+    display: none;
+  }     
+}       
+#cover_left {
+  @extend _cover;
+  transform: translateX(calc(-1 * var(--cover-width)));
+}       
+#cover_right {
+  @extend _cover; 
+  transform: translateX(calc(var(--width)));
+} 
+
+//  背景板。
+#backboard {
+  position: relative;
+  overflow: hidden;
+  grid-template-columns: 1fr;
+  margin: 0px;
+  background: var(--color--backboard--bg);
+  border: var(--border--great) solid var(--color--backboard--border);
+
+  height: 100vh;
+  width: var(--width);
+  justify-content: center;
+}
+
+_palette {
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+  height: calc(var(--height) * 0.3);
+}
+
+#basic_colors {
+  @extend _palette;
+}
+
+#saturations {
+  @extend _palette;
+}
+
+#brightnesses {
+  @extend _palette;
+}
+
 div {
   color: red;
 }
