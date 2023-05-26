@@ -15,15 +15,34 @@ class App extends React.Component {
   }
 }
 
+//  クリップボード
+class Clipboard {
+  static write = (data) => {
+    setTimeout(async () => await navigator.clipboard.writeText(data))
+  }
+  static read = (callback) => {
+    navigator.clipboard?.readText().then((data) => {
+      callback(data)
+    })
+  }
+}
+
 //  ページの背景板。
 class Backboard extends React.Component {
   render() {
     return (
       <div id="backboard"
       >
-        <BasicColors/>
-        <Saturations/>
-        <Brightnesses/>
+        <div id="top">
+          <BasicColors/>
+        </div>
+        <div id="middle">
+          <Gradation/>
+          <PickedColors/>
+        </div>
+        <div id="bottom">
+          <Console/>
+        </div>
       </div>
     )
   }
@@ -65,12 +84,13 @@ class BasicColors extends React.Component {
     _react[this.state.id] = this
   }
   static clicked = (e) => {
-    console.log(Color.mix("#ffffff", "#000000", 0.1))
     let index = _pickedColors.includes(undefined) ? _pickedColors.indexOf(undefined) : (_pickedColors.length - 1)
+    _currentPickedColor = index
     let color = _basicColors[e.currentTarget.dataset.colornum]
-    _pickedColors[index] = color
-    _react.saturations.forceUpdate()
-    _react.brightnesses.forceUpdate()
+    let tmp: PickedColorCell = {baseColor: color, actualColor: color}
+    _pickedColors[index] = tmp
+    _react.gradation.setState({color: color})
+    _react.picked_colors.forceUpdate()
   }
 
   render() {
@@ -93,6 +113,116 @@ class BasicColors extends React.Component {
   }
 }
 
+class Gradation extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {id: "gradation", color: "#ffffff"}
+    _react[this.state.id] = this
+  }
+  static clicked = (e) => {
+    if(isNaN(_currentPickedColor) || _currentPickedColor == null) return
+    let currentPickedColor = _pickedColors[_currentPickedColor]
+    let actualColor = e.currentTarget.style.background
+    let array = actualColor.replace(/[^0-9,]/g, "").split(",").map((n) => {return parseInt(n)})
+    let saturation = e.currentTarget.dataset.saturation
+    let brightness = e.currentTarget.dataset.brightness
+    currentPickedColor.actualColor = Color.rgbToCode(array)
+    currentPickedColor.saturation = saturation
+    currentPickedColor.brightness = brightness
+    _react.picked_colors.forceUpdate()
+  }
+  render() {
+    let grid = [];
+    "0123456789abcdef".split("").forEach((n, i) => {
+      let baseColor = Color.mix("#000000", "#ffffff", (1.0 * i/ 15))
+      "0123456789abcdef".split("").forEach((o, j) => {
+        let actualColor = Color.mix(baseColor, this.state.color, (1.0 * j/ 15))
+        grid.push((
+          <div key={`${i}_${j}`}
+            style={{background: actualColor}}
+            onClick={Gradation.clicked}
+            data-saturation={i}
+            data-brightness={j}
+          />
+        ))
+      })
+    })
+    return (
+      <div id={this.state.id}>
+        {grid}
+      </div>
+    )
+  }
+}
+
+class PickedColors extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {id: "picked_colors"}
+    _react[this.state.id] = this
+  }
+  static getElement = (x, y) => {
+    if(!(x && y)) return null
+    return document.elementFromPoint(x, y)
+  }
+  static clicked = (e) => {
+    let cell = this.getElement(e.clientX, e.clientY)
+    if(!cell) return
+    let color = _pickedColors[cell.dataset.pickednum]?.baseColor
+    if(color) _react.gradation.setState({color: color})
+    _currentPickedColor = cell.dataset.pickednum
+  }
+  static mouseDown = (e) => {
+    let cell = this.getElement(e.nativeEvent.pageX, e.nativeEvent.pageY)
+    if(!cell) return
+    _mouseDownedPickedCellNum = cell.dataset.pickednum
+    _mouseUpedPickedCellNum = null
+  }
+  static mouseUp = (e) => {
+    let cell = this.getElement(e.nativeEvent.pageX, e.nativeEvent.pageY)
+    if(!cell || !cell.classList.contains("cell--picked")) return
+    let pickednum = cell.dataset.pickednum
+    if(_mouseDownedPickedCellNum != pickednum) {
+      let l = _pickedColors[_mouseDownedPickedCellNum]
+      let r = _pickedColors[pickednum]
+      let tmp = r
+      _pickedColors[pickednum] = l
+      _pickedColors[_mouseDownedPickedCellNum] = tmp
+      _react.picked_colors.forceUpdate()
+    }
+  }
+  static touchStart = (e) => {
+    this.mouseDown(e)
+  }
+  static touchEnd = (e) => {
+    this.mouseUp(e)
+  }
+  render() {
+    let colors = []
+    _pickedColors.forEach((c, i) => {
+      colors.push((
+        <div key={i}
+          className={"cell--picked"}
+          style={{background: c?.actualColor}}
+          data-pickednum={i}
+        />
+      ))
+    })
+    return (
+      <div id={this.state.id}
+        onClick={PickedColors.clicked}
+        onMouseDown={PickedColors.mouseDown}
+        onMouseUp={PickedColors.mouseUp}
+        onTouchStart={PickedColors.touchStart}
+        onTouchEnd={PickedColors.touchEnd}
+      >
+        {colors}
+      </div>
+    )
+  }
+}
+
+
 //  彩度パネル
 class Saturations extends React.Component {
   constructor(props) {
@@ -110,7 +240,6 @@ class Saturations extends React.Component {
     Array(4).fill().forEach((_, i) => {
       let color = _pickedColors[i] || "#ffffff";
       [color, ...Saturations.series(color)].forEach((c, n) => {
-        console.log(c)
         colors.push(
           <div key={`${i}${n}`}
             className={"cell"}
@@ -157,6 +286,62 @@ class Brightnesses extends React.Component {
       >
         {colors}
       </div>
+    )
+  }
+}
+
+class Pages extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {id: "pages"}
+    _react[this.state.id] = this
+  }
+  render() {
+    let pages = []
+    Array(6).fill().forEach((_, i) => {
+      pages.push(
+        <div key={i}>
+          {i + 1}
+        </div>
+      )
+    })
+    return (
+      <div id={this.state.id}>
+        {pages}
+      </div>
+    )
+  }
+}
+
+class Console extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {id: "console"}
+    _react[this.state.id] = this
+  }
+  static export = (e) => {
+    Clipboard.write(_pickedColors.map((c) => {return c?.actualColor}).filter((c) => {return c}))
+  }
+  static import = (e) => {
+    Clipboard.read((d) => {
+      let array = d.split(",")
+    })
+  }
+  render() {
+    return (
+      <>
+        <Pages/>
+        <div
+          onClick={Console.export}
+        >
+          Export to Clipboard!
+        </div>
+        <div
+          onClick={() => {location.reload()}}
+        >
+          Reset
+        </div>
+      </>
     )
   }
 }
@@ -214,7 +399,10 @@ init = () => {
   _saturations = [
     "#ffffff", "#dddddd", "#bbbbbb", "#999999", "#777777"
   ]
-  _pickedColors = Array(4).fill()
+  _pickedColors = Array(8).fill()
+
+  _currentPickedColor = null
+  _mouseDownedPickedCellNum = null
 
   window._react = {}
   _react = window._react
@@ -224,6 +412,13 @@ init = () => {
       <App />
     </React.StrictMode>
   )
+}
+
+type PickedColorCell = {
+  brightness: number;
+  saturation: number;
+  baseColor: string;
+  actualColor: string;
 }
 
 window.onload = () => {

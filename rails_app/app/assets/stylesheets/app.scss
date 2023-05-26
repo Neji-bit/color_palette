@@ -11,6 +11,8 @@
 
   font-family: system-ui;
   user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
   box-sizing: border-box;
   -webkit-tap-highlight-color:rgba(0,0,0,0);
 }
@@ -19,6 +21,7 @@
   --color--backboard--bg: silver;
   --border--great: 10px;
   --color--backboard--border: black;
+  overscroll-behavior: none;
 }
 body {
   * {
@@ -33,6 +36,21 @@ body {
   margin: 0px;
   justify-content: center;
   overflow: scroll;
+}
+
+//  コンテンツを中央に表示する。
+centering {
+  justify-content: center;
+  align-items: center;
+}
+
+#top {}
+#middle {
+  grid-template-columns: auto 1fr;
+  grid-template-rows: 1fr;
+}
+#bottom {
+  grid-template-rows: 1fr 2fr 1fr;
 }
 
 
@@ -62,6 +80,7 @@ _cover {
   position: relative;
   overflow: hidden;
   grid-template-columns: 1fr;
+  grid-template-rows: repeat(3, 1fr);
   margin: 0px;
   background: var(--color--backboard--bg);
   border: var(--border--great) solid var(--color--backboard--border);
@@ -89,6 +108,32 @@ _palette {
   @extend _palette;
 }
 
+#gradation {
+  --grid-num: 16;
+  grid-template-columns: repeat(var(--grid-num), 1fr);
+  grid-template-rows: repeat(var(--grid-num), 1fr);
+  height: calc(var(--height) * 0.3);
+  width: calc(var(--height) * 0.3);
+  background: green;
+  * {
+    border: none;
+  }
+}
+#picked_colors {
+  @extend _palette;
+  grid-template-columns: repeat(2, 1fr);
+  grid-template-rows: repeat(4, 1fr);
+}
+
 div {
   color: red;
+}
+
+#pages {
+  grid-template-columns: repeat(6, 1fr);
+  grid-template-rows: 1fr;
+
+  div {
+    @extend centering;
+  }
 }

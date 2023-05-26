@@ -9,5 +9,6 @@ html
     = stylesheet_link_tag "app", "data-turbo-track": "reload"
     = javascript_include_tag "app", "data-turbo-track": "reload", defer: true
     /= favicon_link_tag "app.svg"
+    link[rel="manifest" href="/manifest.json"]
   body
     #root
