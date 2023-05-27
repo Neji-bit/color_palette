@@ -2,7 +2,14 @@ import React from 'react'
 import { createRoot } from 'react-dom/client'
 
 class App extends React.Component {
+  static initialize = () => {
+    pages.querySelector('[data-pagenum="0"]').click()
+  }
   componentDidMount() {
+    App.initialize()
+  }
+  componentDidUpdate() {
+    App.initialize()
   }
   render() {
     return (
@@ -87,8 +94,9 @@ class BasicColors extends React.Component {
     let index = _pickedColors.includes(undefined) ? _pickedColors.indexOf(undefined) : (_pickedColors.length - 1)
     _currentPickedColor = index
     let color = _basicColors[e.currentTarget.dataset.colornum]
-    let tmp: PickedColorCell = {baseColor: color, actualColor: color, saturation: 0, brightness: 0}
+    let tmp = new PickedColorCell({baseColor: color, actualColor: color, saturation: 0, brightness: 0})
     _pickedColors[index] = tmp
+    PickedColorCell.dataSave()
     _react.gradation.setState({color: color})
     _react.picked_colors.forceUpdate()
   }
@@ -129,9 +137,7 @@ class Gradation extends React.Component {
     let array = actualColor.replace(/[^0-9,]/g, "").split(",").map((n) => {return parseInt(n)})
     let saturation = cell.dataset.saturation
     let brightness = cell.dataset.brightness
-    currentPickedColor.actualColor = Color.rgbToCode(array)
-    currentPickedColor.saturation = saturation
-    currentPickedColor.brightness = brightness
+    currentPickedColor.update({actualColor: Color.rgbToCode(array), saturation: saturation, brightness: brightness})
     _react.picked_colors.forceUpdate()
     _react.gradation.forceUpdate()
   }
@@ -250,11 +256,33 @@ class Pages extends React.Component {
     this.state = {id: "pages"}
     _react[this.state.id] = this
   }
+  static clicked = (e) => {
+    _currentPage = e.currentTarget.dataset.pagenum
+    let json = Storage.load(_currentPage)
+    let data = JSON.parse(json) || Array(8).fill()
+    _pickedColors = data.map((d) => {
+      if(!d) return undefined
+      return new PickedColorCell({
+        brightness: d._brightness,
+        saturation: d._saturation,
+        baseColor: d._baseColor,
+        actualColor: d._actualColor
+      })
+    })
+    _react.picked_colors.forceUpdate()
+    _react.pages.forceUpdate()
+  }
   render() {
     let pages = []
     Array(6).fill().forEach((_, i) => {
+      let classes = ["page"]
+      if(_currentPage == i) classes.push("current")
       pages.push(
-        <div key={i}>
+        <div key={i}
+          className={classes.join(" ")}
+          onClick={Pages.clicked}
+          data-pagenum={i}
+        >
           {i + 1}
         </div>
       )
@@ -357,6 +385,7 @@ init = () => {
 
   _currentPickedColor = null
   _mouseDownedPickedCellNum = null
+  _currentPage = 0
 
   window._react = {}
   _react = window._react
@@ -368,11 +397,45 @@ init = () => {
   )
 }
 
-type PickedColorCell = {
-  brightness: number;
-  saturation: number;
-  baseColor: string;
-  actualColor: string;
+class PickedColorCell {
+  constructor(props = {}) {
+    this.brightness = false;
+    ["brightness", "saturation", "baseColor" ,"actualColor"].forEach((e) => {
+      this[e] = props[e]
+    })
+    this.autoSaveFlag = true
+  }
+  update = (props = {}) => {
+    this.autoSaveFlag = false;
+    ["brightness", "saturation", "baseColor" ,"actualColor"].forEach((e) => {
+      this[e] = props[e] ? props[e] : this[e]
+    })
+    this.autoSaveFlag = true
+    PickedColorCell.dataSave()
+  }
+  set brightness(value) { this._brightness = value; if(this.autoSaveFlag) PickedColorCell.dataSave() }
+  set saturation(value) { this._saturation = value; if(this.autoSaveFlag) PickedColorCell.dataSave() }
+  set baseColor(value) { this._baseColor = value; if(this.autoSaveFlag) PickedColorCell.dataSave() }
+  set actualColor(value) { this._actualColor = value; if(this.autoSaveFlag) PickedColorCell.dataSave() }
+  get brightness() {return this._brightness}
+  get saturation() {return this._saturation}
+  get baseColor() {return this._baseColor}
+  get actualColor() {return this._actualColor}
+
+  static dataSave = () => {
+    let data = JSON.stringify(_pickedColors)
+    Storage.save(_currentPage, data)
+  }
+}
+
+class Storage {
+  static STORAGE_ID = "color_palette"
+  static save = (id, value) => {
+    return localStorage.setItem(`${Storage.STORAGE_ID}_${id}`, value)
+  }
+  static load = (id) => {
+    return localStorage.getItem(`${Storage.STORAGE_ID}_${id}`)
+  }
 }
 
 window.onload = () => {

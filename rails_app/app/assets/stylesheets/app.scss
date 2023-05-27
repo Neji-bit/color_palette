@@ -27,7 +27,7 @@ body {
   * {
     display: grid;
   //  TODO  開発用。赤枠を表示。
-    border: 0.5px solid red;
+  //  border: 0.5px solid red;
   }
 
   //  基本、すべてグリッドで管理する。
@@ -115,11 +115,16 @@ _palette {
   height: calc(var(--height) * 0.3);
   width: calc(var(--height) * 0.3);
   background: green;
+  border: 1px solid black;
 }
 #picked_colors {
   @extend _palette;
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: repeat(4, 1fr);
+  border: 0.5px solid black;
+  div {
+    border: 0.5px solid black;
+  }
 }
 
 div {
@@ -129,19 +134,21 @@ div {
 #pages {
   grid-template-columns: repeat(6, 1fr);
   grid-template-rows: 1fr;
+  border: 0.5px solid black;
 
   div {
     @extend centering;
+    border: 0.5px solid black;
   }
 }
 
 .cell--picked {
   --deg: 45deg;
-  --border: 1px;
+  --border: 2px;
   &.current {
-    border: var(--border) solid black;
-    border-image: linear-gradient(var(--deg), white 0%, black 100%);
-    border-image-slice: 1;
+    border: var(--border) solid black !important;
+    border-image: linear-gradient(var(--deg), white 0%, black 100%) !important;
+    border-image-slice: 1 !important;
   }
 }
 .cell--gradation {
@@ -158,5 +165,9 @@ div {
       --color-r: blue;
     }
   }
+}
+.page.current {
+  border: 2px solid black !important;
+  background: pink;
 }
 
