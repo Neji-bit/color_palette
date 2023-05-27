@@ -87,7 +87,7 @@ class BasicColors extends React.Component {
     let index = _pickedColors.includes(undefined) ? _pickedColors.indexOf(undefined) : (_pickedColors.length - 1)
     _currentPickedColor = index
     let color = _basicColors[e.currentTarget.dataset.colornum]
-    let tmp: PickedColorCell = {baseColor: color, actualColor: color}
+    let tmp: PickedColorCell = {baseColor: color, actualColor: color, saturation: 0, brightness: 0}
     _pickedColors[index] = tmp
     _react.gradation.setState({color: color})
     _react.picked_colors.forceUpdate()
@@ -133,6 +133,7 @@ class Gradation extends React.Component {
     currentPickedColor.saturation = saturation
     currentPickedColor.brightness = brightness
     _react.picked_colors.forceUpdate()
+    _react.gradation.forceUpdate()
   }
   static mouseDown = (e) => { this.pickColor(e) }
   static mouseMove = (e) => { this.pickColor(e) }
@@ -140,13 +141,18 @@ class Gradation extends React.Component {
   static touchMove = (e) => { this.pickColor(e) }
   render() {
     let grid = [];
+    let actives = _pickedColors.filter(p => p).map(p => `${p.saturation}_${p.brightness}`)
+    let currentPickedColorPoint = (((x) => {return x ? `${x.saturation}_${x.brightness}` : null})(_pickedColors[_currentPickedColor]))
     "0123456789abcdef".split("").forEach((n, i) => {
       let baseColor = Color.mix("#000000", "#ffffff", (1.0 * i/ 15))
       "0123456789abcdef".split("").forEach((o, j) => {
         let actualColor = Color.mix(baseColor, this.state.color, (1.0 * j/ 15))
+        let classes = ["cell--gradation"]
+        if(actives.includes(`${i}_${j}`)) classes.push("pointer")
+        if(currentPickedColorPoint == `${i}_${j}`) classes.push("current")
         grid.push((
           <div key={`${i}_${j}`}
-            className={"cell--gradation"}
+            className={classes.join(" ")}
             style={{background: actualColor}}
             data-saturation={i}
             data-brightness={j}
@@ -186,6 +192,7 @@ class PickedColors extends React.Component {
     let color = _pickedColors[cell.dataset.pickednum]?.baseColor
     if(color) _react.gradation.setState({color: color})
     _currentPickedColor = cell.dataset.pickednum
+    _react.picked_colors.forceUpdate()
   }
   static mouseDown = (e) => {
     let cell = Util.getElement(e.nativeEvent.pageX, e.nativeEvent.pageY)
@@ -217,7 +224,7 @@ class PickedColors extends React.Component {
     _pickedColors.forEach((c, i) => {
       colors.push((
         <div key={i}
-          className={"cell--picked"}
+          className={`cell--picked${i == _currentPickedColor ? " current" : ""}`}
           style={{background: c?.actualColor}}
           data-pickednum={i}
         />
@@ -230,74 +237,6 @@ class PickedColors extends React.Component {
         onMouseUp={PickedColors.mouseUp}
         onTouchStart={PickedColors.touchStart}
         onTouchEnd={PickedColors.touchEnd}
-      >
-        {colors}
-      </div>
-    )
-  }
-}
-
-
-//  彩度パネル
-class Saturations extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {id: "saturations"}
-    _react[this.state.id] = this
-  }
-  static series = (code: string) => {
-    let baseColor = "#7f7f7f"
-    let result = [1.0, 0.8, 0.6, 0.4, 0.2]
-    return result.map((r) => {return Color.mix(code, baseColor, r)})
-  }
-  render() {
-    let colors = []
-    Array(4).fill().forEach((_, i) => {
-      let color = _pickedColors[i] || "#ffffff";
-      [color, ...Saturations.series(color)].forEach((c, n) => {
-        colors.push(
-          <div key={`${i}${n}`}
-            className={"cell"}
-            style={{background: c || "#000000"}}
-          />
-        )
-      })
-    })
-    return (
-      <div id={this.state.id}
-      >
-        {colors}
-      </div>
-    )
-  }
-}
-
-//  明度パネル
-class Brightnesses extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = {id: "brightnesses"}
-    _react[this.state.id] = this
-  }
-  static series = (code: string) => {
-    let baseColor = ["#ffffff", "#ffffff", code, "#000000", "#000000"]
-    let result = [0.5 * 1 / 3, 0.5 * 2 / 3, 0.5, 0.5 * 2 / 3, 0.5 * 1 / 3]
-    return result.map((r, i) => {return Color.mix(code, baseColor[i], r)})
-  }
-  render() {
-    let colors = []
-    Array(4).fill().forEach((_, i) => {
-      let color = _pickedColors[i] || "#7f7f7f";
-      [color, ...Brightnesses.series(color)].forEach((c, n) => {
-        colors.push(
-          <div key={`${i}${n}`}
-            className={"cell"}
-            style={{background: c || "#000000"}}
-          />)
-      })
-    })
-    return (
-      <div id={this.state.id}
       >
         {colors}
       </div>
