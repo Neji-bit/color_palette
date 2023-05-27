@@ -119,6 +119,7 @@ _palette {
 }
 #picked_colors {
   @extend _palette;
+  position: relative;
   grid-template-columns: repeat(2, 1fr);
   grid-template-rows: repeat(4, 1fr);
   border: 0.5px solid black;
@@ -169,5 +170,37 @@ div {
 .page.current {
   border: 2px solid black !important;
   background: pink;
+}
+
+#erase {
+  position: absolute;
+  @extend .tear;
+  i {
+    color: black;
+    transform: rotate(-45deg);
+  }
+  --margin-v: 0px;
+  --margin-h: 10px;
+  &.position--0 { right: calc(var(--margin-h) + 100%); top: calc(var(--margin-v)); }
+  &.position--1 { right: calc(var(--margin-h) + 50%); top: calc(var(--margin-v)); }
+  &.position--2 { right: calc(var(--margin-h) + 100%); top: calc(var(--margin-v) + 25%); }
+  &.position--3 { right: calc(var(--margin-h) + 50%); top: calc(var(--margin-v) + 25%); }
+  &.position--4 { right: calc(var(--margin-h) + 100%); top: calc(var(--margin-v) + 50%); }
+  &.position--5 { right: calc(var(--margin-h) + 50%); top: calc(var(--margin-v) + 50%); }
+  &.position--6 { right: calc(var(--margin-h) + 100%); top: calc(var(--margin-v) + 75%); }
+  &.position--7 { right: calc(var(--margin-h) + 50%); top: calc(var(--margin-v) + 75%); }
+}
+.hidden {
+  display: none;
+}
+
+.tear {
+  width: 60px;
+  height: 60px;
+  border-radius: 80% 0 55% 50% / 55% 0 80% 50%;
+  border: 3px solid black;
+  transform: rotate(45deg);
+  background: white;
+  @extend centering;
 }
 

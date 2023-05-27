@@ -186,6 +186,44 @@ class Util {
   }
 }
 
+class Erase extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {id: "erase"}
+    _react[this.state.id] = this
+  }
+  static erase = () => {
+    erase.classList.remove("hidden")
+  }
+  static enable = () => {
+    if(!_eraseTimer) _eraseTimer = setTimeout(Erase.erase, 500)
+  }
+  static disable = () => {
+    clearTimeout(_eraseTimer)
+    _eraseTimer = null
+    erase.classList.add("hidden")
+  }
+  static mouseUp = (e) => {
+    _pickedColors[_currentPickedColor] = undefined
+    _react.picked_colors.forceUpdate()
+    _react.gradation.forceUpdate()
+    PickedColorCell.dataSave()
+    Erase.disable()
+    e.stopPropagation()
+  }
+  render() {
+    let classes = ["hidden", `position--${_currentPickedColor}`]
+    return (
+      <div id={this.state.id}
+        className={classes.join(" ")}
+        onMouseUp={Erase.mouseUp}
+      >
+        <i className={"fa-sharp fa-solid fa-trash fa-lg"}/>
+      </div>
+    )
+  }
+}
+
 class PickedColors extends React.Component {
   constructor(props) {
     super(props)
@@ -197,14 +235,18 @@ class PickedColors extends React.Component {
     if(!cell) return
     let color = _pickedColors[cell.dataset.pickednum]?.baseColor
     if(color) _react.gradation.setState({color: color})
-    _currentPickedColor = cell.dataset.pickednum
-    _react.picked_colors.forceUpdate()
   }
   static mouseDown = (e) => {
     let cell = Util.getElement(e.nativeEvent.pageX, e.nativeEvent.pageY)
     if(!cell) return
     _mouseDownedPickedCellNum = cell.dataset.pickednum
     _mouseUpedPickedCellNum = null
+    _currentPickedColor = cell.dataset.pickednum
+    _react.picked_colors.forceUpdate()
+    Erase.enable()
+  }
+  static mouseMove = (e) => {
+    if(document.getElementById("erase")?.classList.contains("hidden")) Erase.disable()
   }
   static mouseUp = (e) => {
     let cell = Util.getElement(e.nativeEvent.pageX, e.nativeEvent.pageY)
@@ -218,11 +260,29 @@ class PickedColors extends React.Component {
       _pickedColors[_mouseDownedPickedCellNum] = tmp
       _react.picked_colors.forceUpdate()
     }
+    PickedColorCell.dataSave()
+    Erase.disable()
   }
   static touchStart = (e) => {
     this.mouseDown(e)
   }
+  static touchMove = (e) => {
+    this.mouseMove(e)
+  }
   static touchEnd = (e) => {
+    //  iPhone用ルート。
+    //  iPhoneでは
+    //    色にタッチ > 出てきたゴミ箱にスライド > 指を離す
+    //  をすると、最初の「色」でtouchEndが発生する。
+    //  PC Chrome では上記の動きをすると Erase の mouseUp が発生する。
+    //  そのため、ここで「指を離した際の座標で部品を確認」し、ゴミ箱だったらEraseに送る。
+    let x = e.nativeEvent.pageX
+    let y = e.nativeEvent.pageY
+    let target = Util.getElement(x, y)
+    if(target.id == "erase") {
+      Erase.mouseUp(e)
+      return
+    }
     this.mouseUp(e)
   }
   render() {
@@ -240,11 +300,14 @@ class PickedColors extends React.Component {
       <div id={this.state.id}
         onClick={PickedColors.clicked}
         onMouseDown={PickedColors.mouseDown}
+        onMouseMove={PickedColors.mouseMove}
         onMouseUp={PickedColors.mouseUp}
         onTouchStart={PickedColors.touchStart}
+        onTouchMove={PickedColors.touchMove}
         onTouchEnd={PickedColors.touchEnd}
       >
         {colors}
+        <Erase/>
       </div>
     )
   }
@@ -270,6 +333,7 @@ class Pages extends React.Component {
       })
     })
     _react.picked_colors.forceUpdate()
+    _react.gradation.setState({color: _pickedColors[_currentPickedColor]?.baseColor || "#ffffff"})
     _react.pages.forceUpdate()
   }
   render() {
@@ -386,6 +450,7 @@ init = () => {
   _currentPickedColor = null
   _mouseDownedPickedCellNum = null
   _currentPage = 0
+  _eraseTimer = null
 
   window._react = {}
   _react = window._react
