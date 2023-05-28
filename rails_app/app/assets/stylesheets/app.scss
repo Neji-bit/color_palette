@@ -12,6 +12,7 @@
   }
 
   font-family: system-ui;
+  font-family: "Menlo", monospace;
   user-select: none;
   -webkit-user-select: none;
   -moz-user-select: none;
@@ -111,6 +112,7 @@ _palette {
 }
 
 #gradation {
+  position: relative;
   --grid-num: 16;
   grid-template-columns: repeat(var(--grid-num), 1fr);
   grid-template-rows: repeat(var(--grid-num), 1fr);
@@ -195,7 +197,7 @@ div {
   &.position--7 { right: calc(var(--margin-h) + 50%); top: calc(var(--margin-v) + 75%); }
 }
 .hidden {
-  display: none;
+  display: none !important;
 }
 
 .tear {
@@ -208,3 +210,23 @@ div {
   @extend centering;
 }
 
+#color_info {
+  display: flex;
+  position: absolute;
+  background: transparent;
+  width: 100%;
+  height: 100%;
+  align-items: center;
+  justify-content: start;
+  div {
+    position: absolute;
+    padding: 10px;
+    color: black;
+    background: white;
+    border: 0.5px solid black;
+    border-radius: 15px;
+    width: auto;
+    height: auto;
+    font-size: small;
+  }
+}

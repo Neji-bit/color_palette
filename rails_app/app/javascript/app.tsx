@@ -36,9 +36,18 @@ class Clipboard {
 
 //  ページの背景板。
 class Backboard extends React.Component {
+  static mouseUp = (e) => {
+    Erase.disable()
+    ColorInfo.disable()
+  }
+  static touchEnd = (e) => {
+    this.mouseUp(e)
+  }
   render() {
     return (
       <div id="backboard"
+        onMouseUp={Backboard.mouseUp}
+        onTouchEnd={Backboard.touchEnd}
       >
         <div id="top">
           <BasicColors/>
@@ -174,6 +183,7 @@ class Gradation extends React.Component {
         onTouchMove={Gradation.touchMove}
       >
         {grid}
+        <ColorInfo/>
       </div>
     )
   }
@@ -183,6 +193,42 @@ class Util {
   static getElement = (x, y) => {
     if(!(x && y)) return null
     return document.elementFromPoint(x, y)
+  }
+}
+
+class ColorInfo extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {id: "color_info"}
+    _react[this.state.id] = this
+  }
+  static show = () => {
+    color_info.classList.remove("hidden")
+  }
+  static enable = () => {
+    if(!_colorInfoTimer) _colorInfoTimer = setTimeout(ColorInfo.show, 500)
+  }
+  static disable = () => {
+    clearTimeout(_colorInfoTimer)
+    _colorInfoTimer = null
+    color_info.classList.add("hidden")
+  }
+  render() {
+    let code = _pickedColors[_currentPickedColor]?.actualColor
+    let rgb = code ? Color.codeToRgb(code) : null
+    let label = code ? (
+      <div>
+        {code} <br/>
+        {rgb ? `RGB(${rgb.join(", ")})` : null}
+      </div>
+    ) : null
+    return(
+      <div id={this.state.id}
+        className={"hidden"}
+      >
+        {label}
+      </div>
+    )
   }
 }
 
@@ -209,6 +255,7 @@ class Erase extends React.Component {
     _react.gradation.forceUpdate()
     PickedColorCell.dataSave()
     Erase.disable()
+    ColorInfo.disable()
     e.stopPropagation()
   }
   render() {
@@ -242,11 +289,17 @@ class PickedColors extends React.Component {
     _currentPickedColor = cell.dataset.pickednum
     _react.picked_colors.forceUpdate()
     let color = _pickedColors[cell.dataset.pickednum]?.baseColor
-    if(color) _react.gradation.setState({color: color})
-    Erase.enable()
+    if(color) {
+      _react.gradation.setState({color: color})
+      Erase.enable()
+      ColorInfo.enable()
+    } else {
+      _react.gradation.setState({color: "#ffffff"})
+    }
   }
   static mouseMove = (e) => {
     if(document.getElementById("erase")?.classList.contains("hidden")) Erase.disable()
+    if(document.getElementById("color_info")?.classList.contains("hidden")) ColorInfo.disable()
   }
   static mouseUp = (e) => {
     let cell = Util.getElement(e.nativeEvent.pageX, e.nativeEvent.pageY)
@@ -261,7 +314,6 @@ class PickedColors extends React.Component {
       _react.picked_colors.forceUpdate()
     }
     PickedColorCell.dataSave()
-    Erase.disable()
   }
   static touchStart = (e) => {
     this.mouseDown(e)
@@ -455,6 +507,7 @@ init = () => {
   _mouseDownedPickedCellNum = null
   _currentPage = 0
   _eraseTimer = null
+  _colorInfoTimer = null
 
   window._react = {}
   _react = window._react
