@@ -3,11 +3,13 @@
 //  アプリ全体の共通設定。
 * {
   //  ディスプレイの横幅最大値。
+  --height: 100vh;              //  フォールバック。
   --width: 100vw;
+  --height: var(--js--height);  //  JSから「画面有効範囲」を受け取る
+  --width: var(--js--width);
   @media screen and (min-width: 414px) {
     --width: 414px;
   }
-  --height: 100vh;
 
   font-family: system-ui;
   user-select: none;
@@ -59,7 +61,7 @@ _cover {
   position: absolute;
   --cover-width: calc((100vw - var(--width)) / 2);
   width: var(--cover-width);
-  height: 100vh;
+  height: var(--height);
   background: darkgray;
   z-index: 10;
   @media not screen and (min-width: 414px) {
@@ -85,7 +87,7 @@ _cover {
   background: var(--color--backboard--bg);
   border: var(--border--great) solid var(--color--backboard--border);
 
-  height: 100vh;
+  height: var(--height);
   width: var(--width);
   justify-content: center;
 }
@@ -140,6 +142,8 @@ div {
   div {
     @extend centering;
     border: 0.5px solid black;
+    color: black;
+    font-weight: bold;
   }
 }
 

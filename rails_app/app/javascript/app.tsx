@@ -233,8 +233,6 @@ class PickedColors extends React.Component {
   static clicked = (e) => {
     let cell = Util.getElement(e.clientX, e.clientY)
     if(!cell) return
-    let color = _pickedColors[cell.dataset.pickednum]?.baseColor
-    if(color) _react.gradation.setState({color: color})
   }
   static mouseDown = (e) => {
     let cell = Util.getElement(e.nativeEvent.pageX, e.nativeEvent.pageY)
@@ -243,6 +241,8 @@ class PickedColors extends React.Component {
     _mouseUpedPickedCellNum = null
     _currentPickedColor = cell.dataset.pickednum
     _react.picked_colors.forceUpdate()
+    let color = _pickedColors[cell.dataset.pickednum]?.baseColor
+    if(color) _react.gradation.setState({color: color})
     Erase.enable()
   }
   static mouseMove = (e) => {
@@ -427,6 +427,10 @@ class Hotreload {
 }
 
 init = () => {
+  //  モバイル対応。ブラウザの画面有効範囲の高さを取得しCSSへ渡す。
+  document.documentElement.style.setProperty('--js--height', `${window.innerHeight}px`);
+  document.documentElement.style.setProperty('--js--width', `${window.innerWidth}px`);
+
   Hotreload.init()
   Hotreload.enable()
 
