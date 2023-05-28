@@ -256,6 +256,7 @@ class Erase extends React.Component {
     PickedColorCell.dataSave()
     Erase.disable()
     ColorInfo.disable()
+    _react.gradation.setState({color: "#ffffff"})
     e.stopPropagation()
   }
   render() {
@@ -263,9 +264,11 @@ class Erase extends React.Component {
     return (
       <div id={this.state.id}
         className={classes.join(" ")}
-        onMouseUp={Erase.mouseUp}
       >
-        <i className={"fa-sharp fa-solid fa-trash fa-lg"}/>
+        <i
+          className={"fa-sharp fa-solid fa-trash fa-2x"}
+          onMouseUp={Erase.mouseUp}
+        />
       </div>
     )
   }
@@ -331,7 +334,7 @@ class PickedColors extends React.Component {
     let x = e.nativeEvent.pageX
     let y = e.nativeEvent.pageY
     let target = Util.getElement(x, y)
-    if(target.id == "erase") {
+    if(target.classList.contains("fa-trash")) {
       Erase.mouseUp(e)
       return
     }
@@ -345,7 +348,9 @@ class PickedColors extends React.Component {
           className={`cell--picked${i == _currentPickedColor ? " current" : ""}`}
           style={{background: c?.actualColor}}
           data-pickednum={i}
-        />
+        >
+          {(i == _currentPickedColor) ? <Erase/> : null}
+        </div>
       ))
     })
     return (
@@ -359,7 +364,6 @@ class PickedColors extends React.Component {
         onTouchEnd={PickedColors.touchEnd}
       >
         {colors}
-        <Erase/>
       </div>
     )
   }

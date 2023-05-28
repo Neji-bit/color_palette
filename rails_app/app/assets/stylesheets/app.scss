@@ -25,6 +25,8 @@
   --border--great: 10px;
   --color--backboard--border: black;
   overscroll-behavior: none;
+  --tear--width: 60px;
+  --tear--height: 60px;
 }
 body {
   * {
@@ -150,12 +152,27 @@ div {
 }
 
 .cell--picked {
+  position: relative;
   --deg: 45deg;
   --border: 2px;
+  display: flex;
+  @extend centering;
   &.current {
     border: var(--border) solid black !important;
     border-image: linear-gradient(var(--deg), white 0%, black 100%) !important;
     border-image-slice: 1 !important;
+  }
+  #erase {
+    position: absolute;
+    @extend .tear;
+    i {
+      color: black;
+      transform: rotate(-135deg);
+    }
+    --margin-v: 0px;
+    --margin-h: 10px;
+    z-index: 10;
+    top: calc(-1 * var(--tear--width));
   }
 }
 .cell--gradation {
@@ -178,34 +195,16 @@ div {
   background: pink;
 }
 
-#erase {
-  position: absolute;
-  @extend .tear;
-  i {
-    color: black;
-    transform: rotate(-45deg);
-  }
-  --margin-v: 0px;
-  --margin-h: 10px;
-  &.position--0 { right: calc(var(--margin-h) + 100%); top: calc(var(--margin-v)); }
-  &.position--1 { right: calc(var(--margin-h) + 50%); top: calc(var(--margin-v)); }
-  &.position--2 { right: calc(var(--margin-h) + 100%); top: calc(var(--margin-v) + 25%); }
-  &.position--3 { right: calc(var(--margin-h) + 50%); top: calc(var(--margin-v) + 25%); }
-  &.position--4 { right: calc(var(--margin-h) + 100%); top: calc(var(--margin-v) + 50%); }
-  &.position--5 { right: calc(var(--margin-h) + 50%); top: calc(var(--margin-v) + 50%); }
-  &.position--6 { right: calc(var(--margin-h) + 100%); top: calc(var(--margin-v) + 75%); }
-  &.position--7 { right: calc(var(--margin-h) + 50%); top: calc(var(--margin-v) + 75%); }
-}
 .hidden {
   display: none !important;
 }
 
 .tear {
-  width: 60px;
-  height: 60px;
+  width: var(--tear--width);
+  height: var(--tear--height);
   border-radius: 80% 0 55% 50% / 55% 0 80% 50%;
   border: 3px solid black;
-  transform: rotate(45deg);
+  transform: rotate(135deg);
   background: white;
   @extend centering;
 }
@@ -217,7 +216,7 @@ div {
   width: 100%;
   height: 100%;
   align-items: center;
-  justify-content: start;
+  justify-content: center;
   div {
     position: absolute;
     padding: 10px;
