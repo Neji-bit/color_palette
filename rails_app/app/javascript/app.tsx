@@ -4,6 +4,7 @@ import { createRoot } from 'react-dom/client'
 class App extends React.Component {
   static initialize = () => {
     pages.querySelector('[data-pagenum="0"]').click()
+    _react.basic_colors.forceUpdate()
   }
   componentDidMount() {
     App.initialize()
@@ -108,14 +109,20 @@ class BasicColors extends React.Component {
     PickedColorCell.dataSave()
     _react.gradation.setState({color: color})
     _react.picked_colors.forceUpdate()
+    _react.basic_colors.forceUpdate()
   }
 
   render() {
     let colors = []
+    let selected = _pickedColors.filter(c => c).map(c => c.baseColor)
+    let currentCode = _pickedColors[_currentPickedColor]?.baseColor
     _basicColors.forEach((c, i) => {
+      let classes = ["cell"]
+      if(selected.includes(c)) classes.push("selected")
+      if(c == currentCode) classes.push("current")
       colors.push(
         <div key={c}
-          className={"cell"}
+          className={classes.join(" ")}
           style={{background: c}}
           data-colornum={i}
           onClick={BasicColors.clicked}
@@ -247,7 +254,7 @@ class Erase extends React.Component {
   static disable = () => {
     clearTimeout(_eraseTimer)
     _eraseTimer = null
-    erase.classList.add("hidden")
+    document.getElementById("erase")?.classList.add("hidden")
   }
   static mouseUp = (e) => {
     _pickedColors[_currentPickedColor] = undefined
@@ -257,6 +264,7 @@ class Erase extends React.Component {
     Erase.disable()
     ColorInfo.disable()
     _react.gradation.setState({color: "#ffffff"})
+    _react.basic_colors.forceUpdate()
     e.stopPropagation()
   }
   render() {
@@ -294,6 +302,7 @@ class PickedColors extends React.Component {
     let color = _pickedColors[cell.dataset.pickednum]?.baseColor
     if(color) {
       _react.gradation.setState({color: color})
+      _react.basic_colors.forceUpdate()
       Erase.enable()
       ColorInfo.enable()
     } else {
@@ -391,6 +400,7 @@ class Pages extends React.Component {
     _react.picked_colors.forceUpdate()
     _react.gradation.setState({color: _pickedColors[_currentPickedColor]?.baseColor || "#ffffff"})
     _react.pages.forceUpdate()
+    _react.basic_colors.forceUpdate()
   }
   render() {
     let pages = []

@@ -103,6 +103,21 @@ _palette {
 
 #basic_colors {
   @extend _palette;
+  div {
+    transition: 0.3s;
+    --border: 2px;
+    &.selected {
+      --margin: 2px;
+      border: var(--border) solid black;
+      border-radius: 50%;
+      width: calc(100% - var(--margin) * 2);
+      height: calc(100% - var(--margin) * 2);
+      margin: var(--margin);
+    }
+    &.current {
+      border: var(--border) solid white;
+    }
+  }
 }
 
 #saturations {
