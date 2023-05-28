@@ -204,6 +204,7 @@ div {
   --color-l: white;
   --color-r: black;
   --margin: 1px;
+  transition: var(--transition);
   &.pointer {
     position: flex;
     border: var(--border) solid black;
