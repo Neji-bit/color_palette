@@ -305,7 +305,7 @@ class PickedColors extends React.Component {
   }
   static mouseDown = (e) => {
     let cell = Util.getElement(e.nativeEvent.pageX, e.nativeEvent.pageY)
-    if(!cell) return
+    if(!cell || !cell.classList.contains("cell--picked")) return
     _mouseDownedPickedCellNum = cell.dataset.pickednum
     _mouseUpedPickedCellNum = null
     _react.picked_colors.forceUpdate()
