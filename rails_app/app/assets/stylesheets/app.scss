@@ -27,6 +27,7 @@
   overscroll-behavior: none;
   --tear--width: 60px;
   --tear--height: 60px;
+  --transition: 0.3s;
 }
 body {
   * {
@@ -104,7 +105,9 @@ _palette {
 #basic_colors {
   @extend _palette;
   div {
-    transition: 0.3s;
+    @extend centering;
+    color: black;
+    transition: var(--transition);
     --border: 2px;
     &.selected {
       --margin: 2px;
@@ -135,7 +138,7 @@ _palette {
   grid-template-rows: repeat(var(--grid-num), 1fr);
   height: calc(var(--height) * 0.3);
   width: calc(var(--height) * 0.3);
-  background: green;
+  background: transparent;
   border: 1px solid black;
 }
 #picked_colors {
@@ -145,6 +148,7 @@ _palette {
   grid-template-rows: repeat(4, 1fr);
   border: 0.5px solid black;
   div {
+    transition: var(--transition);
     border: 0.5px solid black;
   }
 }
@@ -192,16 +196,19 @@ div {
 }
 .cell--gradation {
   --deg: 45deg;
-  --border: 1px;
+  --border: 1.0px;
   --color-l: white;
   --color-r: black;
+  --margin: 0.1px;
   &.pointer {
+    position: flex;
     border: var(--border) solid black;
-    border-image: linear-gradient(var(--deg), var(--color-l) 0%, var(--color-r) 100%);
-    border-image-slice: 1;
+    width: calc(100% - var(--margin) * 2);
+    height: calc(100% - var(--margin) * 2);
+    margin: var(--margin);
     &.current {
-      --color-l: red;
-      --color-r: blue;
+      border-radius: initial;
+      border-radius: 50%;
     }
   }
 }

@@ -101,7 +101,12 @@ class BasicColors extends React.Component {
     _react[this.state.id] = this
   }
   static clicked = (e) => {
-    let index = _pickedColors.includes(undefined) ? _pickedColors.indexOf(undefined) : (_pickedColors.length - 1)
+    let index = null
+    if(_pickedColors.includes(undefined)) {
+      index = _pickedColors.indexOf(undefined)
+    } else {
+      return
+    } 
     _currentPickedColor = index
     let color = _basicColors[e.currentTarget.dataset.colornum]
     let tmp = new PickedColorCell({baseColor: color, actualColor: color, saturation: 0, brightness: 0})
@@ -118,6 +123,7 @@ class BasicColors extends React.Component {
     let currentCode = _pickedColors[_currentPickedColor]?.baseColor
     _basicColors.forEach((c, i) => {
       let classes = ["cell"]
+      let count = selected.filter(s => s == c).length
       if(selected.includes(c)) classes.push("selected")
       if(c == currentCode) classes.push("current")
       colors.push(
@@ -126,7 +132,9 @@ class BasicColors extends React.Component {
           style={{background: c}}
           data-colornum={i}
           onClick={BasicColors.clicked}
-        />)
+        >
+          {1 < count ? count : null}
+        </div>)
     })
     return (
       <div id={this.state.id}
@@ -307,6 +315,7 @@ class PickedColors extends React.Component {
       ColorInfo.enable()
     } else {
       _react.gradation.setState({color: "#ffffff"})
+      _react.basic_colors.forceUpdate()
     }
   }
   static mouseMove = (e) => {
