@@ -105,6 +105,9 @@ class BasicColors extends React.Component {
     if(_pickedColors.includes(undefined)) {
       index = _pickedColors.indexOf(undefined)
     } else {
+      console.log("XXXX")
+      _currentPickedColor = null
+      _react.picked_colors.forceUpdate()
       return
     } 
     _currentPickedColor = index
@@ -305,15 +308,16 @@ class PickedColors extends React.Component {
     if(!cell) return
     _mouseDownedPickedCellNum = cell.dataset.pickednum
     _mouseUpedPickedCellNum = null
-    _currentPickedColor = cell.dataset.pickednum
     _react.picked_colors.forceUpdate()
     let color = _pickedColors[cell.dataset.pickednum]?.baseColor
     if(color) {
+      _currentPickedColor = cell.dataset.pickednum
       _react.gradation.setState({color: color})
       _react.basic_colors.forceUpdate()
       Erase.enable()
       ColorInfo.enable()
     } else {
+      _currentPickedColor = null
       _react.gradation.setState({color: "#ffffff"})
       _react.basic_colors.forceUpdate()
     }

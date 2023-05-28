@@ -10,6 +10,7 @@
   @media screen and (min-width: 414px) {
     --width: 414px;
   }
+  max-height: 896px;
 
   font-family: system-ui;
   font-family: "Menlo", monospace;
@@ -106,7 +107,11 @@ _palette {
   @extend _palette;
   div {
     @extend centering;
-    color: black;
+    color: #212121;
+    font-weight: bold;
+    --shadow--width: 0.4px;
+    --shadow--color: #999999;
+    text-shadow: var(--shadow--width) var(--shadow--width) 0 var(--shadow--color), calc(-1 * var(--shadow--width)) var(--shadow--width) 0 var(--shadow--color), var(--shadow--width) calc(-1 * var(--shadow--width)) 0 var(--shadow--color), calc(-1 * var(--shadow--width)) calc(-1 * var(--shadow--width)) 0 var(--shadow--color);
     transition: var(--transition);
     --border: 2px;
     &.selected {
@@ -173,13 +178,12 @@ div {
 .cell--picked {
   position: relative;
   --deg: 45deg;
-  --border: 2px;
+  --border: 1px;
   display: flex;
   @extend centering;
   &.current {
+    border-radius: 50%;
     border: var(--border) solid black !important;
-    border-image: linear-gradient(var(--deg), white 0%, black 100%) !important;
-    border-image-slice: 1 !important;
   }
   #erase {
     position: absolute;
@@ -199,7 +203,7 @@ div {
   --border: 1.0px;
   --color-l: white;
   --color-r: black;
-  --margin: 0.1px;
+  --margin: 1px;
   &.pointer {
     position: flex;
     border: var(--border) solid black;
@@ -207,6 +211,7 @@ div {
     height: calc(100% - var(--margin) * 2);
     margin: var(--margin);
     &.current {
+      --margin: 0px;
       border-radius: initial;
       border-radius: 50%;
     }
