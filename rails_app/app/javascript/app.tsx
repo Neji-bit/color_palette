@@ -105,7 +105,6 @@ class BasicColors extends React.Component {
     if(_pickedColors.includes(undefined)) {
       index = _pickedColors.indexOf(undefined)
     } else {
-      console.log("XXXX")
       _currentPickedColor = null
       _react.picked_colors.forceUpdate()
       return
@@ -269,6 +268,7 @@ class Erase extends React.Component {
   }
   static mouseUp = (e) => {
     _pickedColors[_currentPickedColor] = undefined
+    _currentPickedColor = null
     _react.picked_colors.forceUpdate()
     _react.gradation.forceUpdate()
     PickedColorCell.dataSave()
