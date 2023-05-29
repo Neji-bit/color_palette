@@ -338,6 +338,7 @@ class PickedColors extends React.Component {
       _pickedColors[_mouseDownedPickedCellNum] = tmp
       _react.picked_colors.forceUpdate()
     }
+    _currentPickedColor = pickednum
     PickedColorCell.dataSave()
   }
   static touchStart = (e) => {
